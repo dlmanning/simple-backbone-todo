@@ -15,7 +15,7 @@ var db = level('data/appdata');
 var server = http.createServer(app).listen(7357);
 
 var apiRoutes = {
-  get: {
+  'GET': {
     'todos': function (req, res) {
       var todos = [];
       db.createReadStream({start: 'todo', end: 'todo' + '\xff', valueEncoding: 'json'})
@@ -42,7 +42,7 @@ var apiRoutes = {
     }
   },
 
-  post: {
+  'POST': {
     'todos': function (req, res) {
       req.pipe(concat({encoding: 'string'}, function (body) {
         var todo;
@@ -65,7 +65,7 @@ var apiRoutes = {
     },
   },
 
-  put: {
+  'PUT': {
     'todos/:id': function (req, res, params) {
       req.pipe(concat({encoding: 'string'}, function (body) {
         var todo;
@@ -88,7 +88,7 @@ var apiRoutes = {
     }
   },
 
-  del: {
+  'DELETE': {
     'todos/:id': function (req, res, params) {
       db.del('todo' + params.id, function (err) {
         if (err) errHandler(err, res)
@@ -101,42 +101,20 @@ var apiRoutes = {
 
 
 function makeApiRouter (apiRoutes) {
-  var getRoutes  = new Routes()
-    , putRoutes  = new Routes()
-    , postRoutes = new Routes()
-    , delRoutes  = new Routes();
 
-  Object.keys(apiRoutes.get)
-        .forEach(function (route) {
-          getRoutes.addRoute(route, apiRoutes.get[route]);
-        });
+  var routes = {};
 
-  Object.keys(apiRoutes.put)
-        .forEach(function (route) {
-          putRoutes.addRoute(route, apiRoutes.put[route]);
-        });
-
-  Object.keys(apiRoutes.post)
-        .forEach(function (route) {
-          postRoutes.addRoute(route, apiRoutes.post[route]);
-        });
-
-  Object.keys(apiRoutes.del)
-        .forEach(function (route) {
-          delRoutes.addRoute(route, apiRoutes.del[route]);
-        });
+  for (verb in apiRoutes) {
+    routes[verb] = new Routes();
+    for (route in apiRoutes[verb]) {
+      routes[verb].addRoute(route, apiRoutes[verb][route]);
+    }
+  }
 
   return function (req, res) {
     var resourcepath = url.parse(req.url).pathname.split('/').slice(2).join('/');
 
-    var routes = {
-      'GET' : getRoutes,
-      'PUT' : putRoutes,
-      'POST': postRoutes,
-      'DELETE' : delRoutes
-    }[req.method];
-
-    var route = routes && routes.match(resourcepath);
+    var route = routes[req.method] && routes[req.method].match(resourcepath);
 
     if (route) {
       route.fn.apply(null, [req, res, route.params]);
