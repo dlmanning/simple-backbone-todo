@@ -40,7 +40,7 @@ define(function (require) {
     },
 
     checkForEnter: function (event) {
-      if (event.charCode === 13) this.addNewTodo();
+      if (event.charCode === 13 && this.$newTodo.val() != '') this.addNewTodo();
     },
 
     addNewTodo: function () {
