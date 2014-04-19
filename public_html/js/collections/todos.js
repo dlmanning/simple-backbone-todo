@@ -8,6 +8,15 @@ define(function (require) {
     url: '/api/todos',
     model: Todo,
 
+    comparator: function (a, b) {
+      if (a.id < b.id)
+        return 1;
+      else if (a.id === b.id)
+        return 0;
+      else 
+        return -1;
+    },
+
     clearCompleted: function () {
       var self = this;
       var completedTodos = [];

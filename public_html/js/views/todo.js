@@ -1,5 +1,6 @@
 define(function (require) {
   var Backbone = require('backbone');
+  var template = require('hbs!templates/todo-item');
 
   //  Views
   var TodoView = Backbone.View.extend({
@@ -17,14 +18,7 @@ define(function (require) {
     },
 
     render: function () {
-      var todoGlyph = this.model.get('done') ? 'glyphicon-ok' : 'glyphicon-remove';
-
-      var $todoButton = $('<button></button>').addClass('btn btn-default btn-lg');
-      var $todoIcon = $('<span></span>').addClass('glyphicon ' + todoGlyph);
-
-      this.$el
-        .html(' ' + this.model.get('description'))
-        .prepend($todoButton.append($todoIcon));
+      this.$el.html(template(this.model.attributes));
 
       return this;
     },

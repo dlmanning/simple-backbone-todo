@@ -24,17 +24,37 @@ define(function (require) {
       this.render();
     },
 
+    showComplete: function () {
+      this.displayFilter = { done: true };
+      this.render();
+    },
+
+    showIncomplete: function () {
+      this.displayFilter = { done: false };
+      this.render();
+    },
+
+    showAll: function () {
+      this.displayFilter = undefined;
+      this.render();
+    },
+
     render: function () {
       var self = this;
+      var visibleTodos;
 
       this.childViews.forEach(function (view) {
         view.remove();
       });
       this.childViews = [];
 
-      this.collection.each(function (todo) {
+      visibleTodos = this.displayFilter ?
+                     this.collection.where(this.displayFilter) :
+                     this.collection;
+
+      visibleTodos.forEach(function (todo) {
         var todoView = new TodoView({model: todo});
-        self.$todoBox.append(todoView.$el);
+        self.$todoBox.append(todoView.el);
         self.childViews.push(todoView);
       });
     },
